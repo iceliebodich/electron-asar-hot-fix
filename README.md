@@ -1,0 +1,75 @@
+# electron-asar-hot-fix
+
+[中文文档](README-CN.md) | English
+
+## What it is
+
+> A NodeJs module for `electron`, used to support app.asar update, revised in `electron-asar-hot-updater` (thanks to yansenlei),`electron-asar-hot-updater `Based on `electron-asar-updater` refactoring.
+
+electron-asar-hot-fix: https://github.com/iceliebodich/electron-asar-hot-fix 
+electron-asar-hot-updater: https://github.com/yansenlei/electron-asar-hot-updater
+
+## How it works (Read this first)
+
+- EAU (Electron Asar Updater) was built upon _Electron Application Updater_ to handle the process of updating the app.asar file inside an Electron app ; **it simply replaces the app.asar file (at /resources/) with the new one called "update.asar"!**
+- The check for "updates" must by triggered by the application. **EAU doesn't make any kind of periodic checks on its own**.
+- EAU talks to an API (let's call it so) to tell it if there is a new update.
+  - Treceives three parameters, the first parameter is the object containing the download url and sha1 value, the second parameter is the successful callback, and the third parameter is the failed callback (the new version of the check needs to be implemented manually).
+  - If there's an update available the API should respond with the _source_ for this update **update.asar** file.
+  - EAU then downloads the .asar file, deletes the old app.asar and renames the update.asar to app.asar.
+
+## But why ? (use cases)
+
+- If you think these are too complicated to implement: https://www.npmjs.com/package/electron-updater http://electron.atom.io/docs/v0.33.0/api/auto-updater/
+- If you don't think it's reasonable to update the hole .app or .exe file (up to 100MB) when you're only changing one file (usually 40MB).
+- If you want to see `progress` when updating.
+- If you want to `check` the version on the `server side` or on the `client side`.
+- If you want to use `zip` to compress files, make your ASAR file smaller.
+
+---
+
+## Installation
+
+```bash
+$ npm install --save electron-asar-hot-fix
+```
+
+Now, inside the _main.js_ file, call it like this:
+
+```js
+const { app, dialog } = require('electron');
+const EAU = require('electron-asar-hot-fix');
+
+// 版本的检查需要手动实施，sha1非必传
+app.on('ready', function () {
+  const params = {
+    url : "",
+    sha1: ""
+  }
+  EAU.download(params, (success)=> {
+
+  }, (error) => {
+
+  })
+```
+
+## let file smaller
+
+If you use a zip file, the plug-in will unzip the file after downloading it, which will make your update file smaller, but you must make sure that `update.asar` is at the root of the zip package:
+
+```
+── update.zip
+   └── update.asar
+```
+
+## Windows update
+
+This is to get around the fact that the prompt text from the timeout command was always being shown, even when redirecting to NUL
+
+The updater.exe is a really simple C# console app, compiled with [Mono](http://www.mono-project.com). [Source code](./updater.cs). from [electron-asar-updater pull #2](https://github.com/whitesmith/electron-asar-updater/pull/2). If the user system version is win7, you may need to manually install [.Net framework](https://dotnet.microsoft.com/download/dotnet-framework) first.
+
+## License
+
+:smiley: if you have any comments or wish to contribute to this project, you are welcome to submit Issues or PR.
+
+MIT - [iceliebodich](https://github.com/iceliebodich)

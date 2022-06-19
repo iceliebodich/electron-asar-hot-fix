@@ -1,0 +1,31 @@
+{
+  "name": "electron-asar-hot-fix",
+  "version": "0.0.1",
+  "description": "Handles Electron app.asar updates.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "electron",
+    "asar",
+    "atom shell",
+    "update",
+    "updater",
+    "fix"
+  ],
+  "author": "panjingye@qq.com, rainbowh.y@foxmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "adm-zip": "^0.4.11",
+    "electron-log": "^4.1.1",
+    "original-fs": "^1.0.0",
+    "request": "^2.87.0",
+    "request-progress": "^3.0.0",
+    "semver-diff": "^3.0.0"
+  }
+}
