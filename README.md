@@ -22,8 +22,6 @@ electron-asar-hot-updater: https://github.com/yansenlei/electron-asar-hot-update
 
 - If you think these are too complicated to implement: https://www.npmjs.com/package/electron-updater http://electron.atom.io/docs/v0.33.0/api/auto-updater/
 - If you don't think it's reasonable to update the hole .app or .exe file (up to 100MB) when you're only changing one file (usually 40MB).
-- If you want to see `progress` when updating.
-- If you want to `check` the version on the `server side` or on the `client side`.
 - If you want to use `zip` to compress files, make your ASAR file smaller.
 
 ---

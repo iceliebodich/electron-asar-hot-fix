@@ -22,8 +22,6 @@ electron-asar-hot-updater: https://github.com/yansenlei/electron-asar-hot-update
 
 - 如果你认为这些太复杂而无法实施: https://www.npmjs.com/package/electron-updater http://electron.atom.io/docs/v0.33.0/api/auto-updater/
 - 如果你认为在更换一个文件（通常为 40MB），.app 或.exe 文件（最多 100MB）是不合理的。
-- 需要在更新时查看进度。
-- 选择使用服务器端检查或客户端检查。
 - 可以使用 zip 压缩文件，压缩你的 ASAR 使其更小。
 
 ---
