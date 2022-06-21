@@ -80,13 +80,12 @@ var Updater = {
         if (contentType && contentType.indexOf("zip") > -1) {
           Updater.log("ZipFilePath: " + AppPathFolder);
           try {
+            const zip = new admZip(body);
+            zip.extractAllTo(AppPathFolder, true);
             // Store the update file path
             Updater.update.file = updateFile;
             // compare sha1
             Updater.compareSha1(params.sha1, updateFile, error);
-
-            const zip = new admZip(body);
-            zip.extractAllTo(AppPathFolder, true);
 
             Updater.log("Updater.update.file: " + updateFile);
             // Success

@@ -1,28 +1,26 @@
 # electron-asar-hot-fix
 
-
 中文文档 | [English](README.md)
 
 ## What it is
 
-> 一个用于`electron`的 NodeJs 模块，用于支持 app.asar 的更新，改版于`electron-asar-hot-updater`(感谢yansenlei)，对功能进行了删改，`electron-asar-hot-updater`基于`electron-asar-updater`重构。
+> 一个用于`electron`的 NodeJs 模块，用于支持 app.asar 的更新，改版于`electron-asar-hot-updater`(感谢 yansenlei)，对功能进行了删改，`electron-asar-hot-updater`基于`electron-asar-updater`重构。
 
-electron-asar-hot-fix: https://github.com/iceliebodich/electron-asar-hot-fix
-electron-asar-hot-updater: https://github.com/yansenlei/electron-asar-hot-updater
+electron-asar-hot-fix: https://github.com/iceliebodich/electron-asar-hot-fix electron-asar-hot-updater: https://github.com/yansenlei/electron-asar-hot-updater
 
 ## 如何工作 (Read this first)
 
-- 用于处理更新 Electron 应用程序内 app.asar 文件的过程;它只是用名为“update.asar”的新文件替换 app.asar 文件（在/ resources /）！
-- 检查“更新”必须由应用程序触发。 `EAU`不会自行进行任何形式的定期检查。
-- `EAU`接收三个参数，参数一为对象包含下载 url 和 sha1 值，参数二为成功的回调，参数三为失败的回调（新版本的检查需要手动实施）
-  - 如果有可用更新，则 API 应使用此更新 update.asar 文件的源进行响应。
-  - EAU 然后下载.asar 文件，删除旧的 app.asar 并将 update.asar 重命名为 app.asar。(为了绕开 Windows 下替换 asar 存在程序占用的问题，会在关闭 Electron 应用后启动`updater.exe`，5 秒后替换 asar)
+-   用于处理更新 Electron 应用程序内 app.asar 文件的过程;它只是用名为“update.asar”的新文件替换 app.asar 文件（在/ resources /）！
+-   检查“更新”必须由应用程序触发。 `EAU`不会自行进行任何形式的定期检查。
+-   `EAU`接收三个参数，参数一为对象包含下载 url 和 sha1 值，参数二为成功的回调，参数三为失败的回调（新版本的检查需要手动实施）
+    -   如果有可用更新，则 API 应使用此更新 update.asar 文件的源进行响应。
+    -   EAU 然后下载.asar 文件，删除旧的 app.asar 并将 update.asar 重命名为 app.asar。(为了绕开 Windows 下替换 asar 存在程序占用的问题，会在关闭 Electron 应用后启动`updater.exe`，5 秒后替换 asar)
 
 ## 为何要使用它 ? (用例)
 
-- 如果你认为这些太复杂而无法实施: https://www.npmjs.com/package/electron-updater http://electron.atom.io/docs/v0.33.0/api/auto-updater/
-- 如果你认为在更换一个文件（通常为 40MB），.app 或.exe 文件（最多 100MB）是不合理的。
-- 可以使用 zip 压缩文件，压缩你的 ASAR 使其更小。
+-   如果你认为这些太复杂而无法实施: https://www.npmjs.com/package/electron-updater http://electron.atom.io/docs/v0.33.0/api/auto-updater/
+-   如果你认为在更换一个文件（通常为 40MB），.app 或.exe 文件（最多 100MB）是不合理的。
+-   可以使用 zip 压缩文件，压缩你的 ASAR 使其更小。
 
 ---
 
@@ -49,6 +47,29 @@ app.on('ready', function () {
   }, (error) => {
 
   })
+}
+```
+
+## 如果使用 vue-cli-plugin-electron-builder 插件打包
+
+你可能需要在 vue.config.js 中配置：
+
+```js
+module.exports = {
+    pluginOptions: {
+        electronBuilder: {
+            builderOptions: {
+                asar: true,
+                extraResources: [
+                    {
+                        from: "node_modules/electron-asar-hot-fix/updater.exe",
+                        to: "../updater.exe",
+                    },
+                ],
+            },
+        },
+    },
+};
 ```
 
 ## 让更新包更小

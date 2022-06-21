@@ -38,7 +38,7 @@ Now, inside the _main.js_ file, call it like this:
 const { app, dialog } = require('electron');
 const EAU = require('electron-asar-hot-fix');
 
-// 版本的检查需要手动实施，sha1非必传
+// Version checking needs to be implemented manually，sha1 is not necessary
 app.on('ready', function () {
   const params = {
     url : "",
@@ -49,6 +49,29 @@ app.on('ready', function () {
   }, (error) => {
 
   })
+}
+```
+
+## if you use vue-cli-plugin-electron-builder plugin
+
+You may need to configure in vue.config.js:
+
+```js
+module.exports = {
+    pluginOptions: {
+        electronBuilder: {
+            builderOptions: {
+                asar: true,
+                extraResources: [
+                    {
+                        from: "node_modules/electron-asar-hot-fix/updater.exe",
+                        to: "../updater.exe",
+                    },
+                ],
+            },
+        },
+    },
+};
 ```
 
 ## let file smaller
