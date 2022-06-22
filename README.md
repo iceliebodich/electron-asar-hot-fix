@@ -49,7 +49,7 @@ app.on('ready', function () {
   }, (error) => {
 
   })
-}
+})
 ```
 
 ## if you use vue-cli-plugin-electron-builder plugin
@@ -76,7 +76,9 @@ module.exports = {
 
 ## let file smaller
 
+When you use compressed files, the comparison of the sha1 value is the comparison of the incoming sha1 and the downloaded zip archive.
 If you use a zip file, the plug-in will unzip the file after downloading it, which will make your update file smaller, but you must make sure that `update.asar` is at the root of the zip package:
+At present, the name of this asar file can only be `update`, and it is not considered to support customization for the time being.
 
 ```
 ── update.zip

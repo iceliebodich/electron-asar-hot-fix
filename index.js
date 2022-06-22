@@ -10,6 +10,7 @@ const AppPathFolder = AppPath.slice(0, AppPath.indexOf("app.asar"));
 const AppAsar = AppPath.slice(0, -1);
 const WindowsUpdater = AppPath.slice(0, AppPath.indexOf("resources")) + "updater.exe";
 const UPDATE_FILE = "update.asar";
+const DOWNLOAD_FILE = "update";
 const errors = [
   "download_file_error",
   "sha1_code_not_match",
@@ -71,61 +72,51 @@ var Updater = {
       },
       function (e, response, body) {
         if (e) {
+          Updater.log("download_file_error: " + error);
           Updater.error(0, error);
-          return console.log("err");
+          return;
         }
-        var updateFile = AppPathFolder + UPDATE_FILE;
-        var contentType = response.headers["content-type"];
 
+        var downloadSubfix = ".asar";
+        var contentType = response.headers["content-type"];
         if (contentType && contentType.indexOf("zip") > -1) {
-          Updater.log("ZipFilePath: " + AppPathFolder);
-          try {
+          downloadSubfix = ".zip";
+        }
+        var updateFile = AppPathFolder + DOWNLOAD_FILE + downloadSubfix;
+
+        // Create the file
+        FileSystem.writeFile(updateFile, body, null, function (e) {
+          if (e) {
+            Updater.log(e + "\n Failed to download the update to a local file.");
+            Updater.error(4, error);
+            return false;
+          }
+
+          if (!Updater.compareSha1(params.sha1, updateFile, error)) {
+            Updater.log("unzip_error");
+            Updater.error(3, error);
+            return;
+          }
+
+          Updater.update.file = AppPathFolder + UPDATE_FILE;
+          Updater.log("Updater.update.file: " + updateFile);
+          if (contentType && contentType.indexOf("zip") > -1) {
             const zip = new admZip(body);
             zip.extractAllTo(AppPathFolder, true);
-            // Store the update file path
-            Updater.update.file = updateFile;
-            // compare sha1
-            Updater.compareSha1(params.sha1, updateFile, error);
-
-            Updater.log("Updater.update.file: " + updateFile);
             // Success
             Updater.log("Update Zip downloaded: " + AppPathFolder);
-
-            Updater.useUpdate(success, error);
-          } catch (error) {
-            Updater.log("unzip error: " + error);
-            Updater.error(3, error);
-          }
-        } else {
-          Updater.log("Upload successful!  Server responded with:");
-          Updater.log("updateFile: " + updateFile);
-
-          // Create the file
-          FileSystem.writeFile(updateFile, body, null, function (e) {
-            if (e) {
-              Updater.log(e + "\n Failed to download the update to a local file.");
-              Updater.error(4, error);
-              return false;
-            }
-
-            // Store the update file path
-            Updater.update.file = updateFile;
-            Updater.log("Updater.update.file: " + updateFile);
-
+          } else {
             // Success
             Updater.log("Update downloaded: " + updateFile);
-            // compare sha1
-            Updater.compareSha1(params.sha1, updateFile, error);
-
-            Updater.useUpdate(success, error);
-          });
-        }
+          }
+          Updater.useUpdate(success, error);
+        });
       }
     );
   },
 
   /**
-   * different platform update function package
+   * different platform update function
    * */
   useUpdate: function (success, error) {
     // Apply the update
@@ -150,11 +141,12 @@ var Updater = {
           return false;
         }
       } catch (e) {
-        Updater.error(2, error);
         Updater.log("sha1_error");
+        Updater.error(2, error);
         return false;
       }
     }
+    return true;
   },
 
   /**
@@ -163,7 +155,6 @@ var Updater = {
   apply: function (error) {
     try {
       this.log("Going to unlink: " + AppPath.slice(0, -1));
-
       FileSystem.unlinkSync(AppPath.slice(0, -1));
       this.log("Asar deleted successfully.");
     } catch (e) {
@@ -175,8 +166,8 @@ var Updater = {
     }
 
     try {
-      this.log("Going to rename: " + this.update.file + " to: " + AppPath.slice(0, -1));
-      FileSystem.renameSync(this.update.file, AppPath.slice(0, -1));
+      this.log("Going to rename: " + Updater.update.file + " to: " + AppPath.slice(0, -1));
+      FileSystem.renameSync(Updater.update.file, AppPath.slice(0, -1));
 
       this.log("Update applied.");
       this.log("End of update.");

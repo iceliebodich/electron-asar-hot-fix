@@ -47,7 +47,7 @@ app.on('ready', function () {
   }, (error) => {
 
   })
-}
+})
 ```
 
 ## 如果使用 vue-cli-plugin-electron-builder 插件打包
@@ -74,7 +74,9 @@ module.exports = {
 
 ## 让更新包更小
 
+当你使用压缩文件时，sha1值的对比是传入的sha1和下载的zip压缩包的对比。
 如果你使用 zip 文件，插件将在下载后解压缩文件，这将使你的更新文件更小，但你必须确保`update.asar`位于 zip 包的根目录：
+目前这个asar文件名称只能是`update`，暂不考虑支持自定义。
 
 ```
 ── update.zip
