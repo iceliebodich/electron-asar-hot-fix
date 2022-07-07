@@ -65,61 +65,72 @@ var Updater = {
    * Download the update file
    * */
   download: function (params, success, error) {
-    request(
-      {
+    let reqData = null;
+    if (params.method == "GET" || params.method == "get") {
+      reqData = {
         uri: params.url,
         encoding: null,
-      },
-      function (e, response, body) {
+        method: "GET",
+        qs: params.args,
+      };
+    } else {
+      reqData = {
+        uri: params.url,
+        encoding: null,
+        method: "POST",
+        form: params.args,
+      };
+    }
+
+    request(reqData, function (e, response, body) {
+      if (e) {
+        Updater.log("download_file_error: " + error);
+        Updater.error(0, error);
+        return;
+      }
+
+      var downloadSubfix = ".asar";
+      var contentDisposition = response.headers["content-disposition"];
+      if (contentDisposition && contentDisposition.indexOf("zip") > -1) {
+        downloadSubfix = ".zip";
+      }
+      var updateFile = AppPathFolder + DOWNLOAD_FILE + downloadSubfix;
+
+      // Create the file
+      FileSystem.writeFile(updateFile, body, null, function (e) {
         if (e) {
-          Updater.log("download_file_error: " + error);
-          Updater.error(0, error);
+          Updater.log(e + "\n Failed to download the update to a local file.");
+          Updater.error(4, error);
+          return false;
+        }
+
+        if (!Updater.compareSha1(params.sha1, updateFile, error)) {
+          Updater.log("unzip_error");
+          Updater.error(3, error);
           return;
         }
 
-        var downloadSubfix = ".asar";
-        var contentType = response.headers["content-type"];
-        if (contentType && contentType.indexOf("zip") > -1) {
-          downloadSubfix = ".zip";
+        Updater.update.file = AppPathFolder + UPDATE_FILE;
+        Updater.log("Updater.update.file: " + updateFile);
+        if (contentDisposition && contentDisposition.indexOf("zip") > -1) {
+          const zip = new admZip(body);
+          zip.extractAllTo(AppPathFolder, true);
+          // Success
+          Updater.log("Update Zip downloaded: " + AppPathFolder);
+        } else {
+          // Success
+          Updater.log("Update downloaded: " + updateFile);
         }
-        var updateFile = AppPathFolder + DOWNLOAD_FILE + downloadSubfix;
-
-        // Create the file
-        FileSystem.writeFile(updateFile, body, null, function (e) {
-          if (e) {
-            Updater.log(e + "\n Failed to download the update to a local file.");
-            Updater.error(4, error);
-            return false;
-          }
-
-          if (!Updater.compareSha1(params.sha1, updateFile, error)) {
-            Updater.log("unzip_error");
-            Updater.error(3, error);
-            return;
-          }
-
-          Updater.update.file = AppPathFolder + UPDATE_FILE;
-          Updater.log("Updater.update.file: " + updateFile);
-          if (contentType && contentType.indexOf("zip") > -1) {
-            const zip = new admZip(body);
-            zip.extractAllTo(AppPathFolder, true);
-            // Success
-            Updater.log("Update Zip downloaded: " + AppPathFolder);
-          } else {
-            // Success
-            Updater.log("Update downloaded: " + updateFile);
-          }
-          Updater.useUpdate(success, error);
-        });
-      }
-    );
+        Updater.useUpdate(success, error);
+      });
+    });
   },
 
   /**
    * different platform update function
    * */
   useUpdate: function (success, error) {
-    // Apply the update
+    // Apply the upda
     if (process.platform === "darwin") {
       Updater.apply(error);
     } else {
