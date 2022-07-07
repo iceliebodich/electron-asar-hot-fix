@@ -84,7 +84,7 @@ var Updater = {
 
     request(reqData, function (e, response, body) {
       if (e) {
-        Updater.log("download_file_error: " + error);
+        Updater.log("download_file_error: " + e);
         Updater.error(0, error);
         return;
       }
@@ -130,7 +130,7 @@ var Updater = {
    * different platform update function
    * */
   useUpdate: function (success, error) {
-    // Apply the upda
+    // Apply the update
     if (process.platform === "darwin") {
       Updater.apply(error);
     } else {
